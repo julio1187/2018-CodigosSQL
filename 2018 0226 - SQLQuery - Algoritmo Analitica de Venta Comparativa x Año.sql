@@ -30,23 +30,24 @@ SELECT Suc = @Sucursal,
 	Util = CASE WHEN Precio1IVAUV = 0 THEN 0.00 ELSE ISNULL(1 - (UltimoCostoNeto/Precio1IVAUV),0.00) END,
 	Estatus = CASE WHEN ExistenciaActualRegular >= StockMinimo AND ExistenciaActualRegular <= StockMaximo THEN 'OK' WHEN ExistenciaActualRegular < StockMinimo THEN 'BAJO' WHEN ExistenciaActualRegular > StockMaximo THEN 'SOBRE' ELSE '' END,
 	Stock30	= StockMinimo,
-	uvAñoAnterior = ISNULL(añoAnterior.CantUV,0.00),
-	uvAñoActual = ISNULL(añoActual.CantUV,0.00),
-	mxnAñoAnterior = ISNULL(añoAnterior.VentUV,0.00),
-	mxnAñoActual = ISNULL(añoActual.VentUV,0.00)
+	uvAï¿½oAnterior = ISNULL(aï¿½oAnterior.CantUV,0.00),
+	uvAï¿½oActual = ISNULL(aï¿½oActual.CantUV,0.00),
+	mxnAï¿½oAnterior = ISNULL(aï¿½oAnterior.VentUV,0.00),
+	mxnAï¿½oActual = ISNULL(aï¿½oActual.VentUV,0.00)
 FROM QVListaprecioConCosto A
 LEFT JOIN (
 	SELECT 
 		Articulo,CantUV,CantUC,VentUV 
 	FROM OrderListaMovimientosVentaPorPeriodo(@MesActualInicio2,@MesActualFinal2)
 	WHERE Articulo IN (SELECT Articulo FROM articulosCTE)
-) AS añoAnterior ON añoAnterior.Articulo = A.Articulo
+) AS aï¿½oAnterior ON aï¿½oAnterior.Articulo = A.Articulo
 LEFT JOIN (
 	SELECT 
 		Articulo,CantUV,CantUC,VentUV 
 	FROM OrderListaMovimientosVentaPorPeriodo(@MesActualInicio,@MesActualFinal)
 	WHERE Articulo IN (SELECT Articulo FROM articulosCTE)
-) AS añoActual ON añoActual.Articulo = A.Articulo
+) AS aï¿½oActual ON aï¿½oActual.Articulo = A.Articulo
 WHERE Almacen = @Almacen AND Tienda = @Tienda
 	AND A.Articulo IN  (SELECT Articulo FROM articulosCTE)
 ) AS Tabla
+ORDER BY Articulo
