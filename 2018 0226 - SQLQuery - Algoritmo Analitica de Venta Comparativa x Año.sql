@@ -1,4 +1,5 @@
 
+
 DECLARE @toDay DATETIME = GETDATE()
 DECLARE @toDayBack DATETIME = DATEADD(YY,-1,@toDay)
 DECLARE @MesActualInicio DATETIME = CAST('20180101' AS DATETIME) --DATEADD(MM,DATEDIFF(MM,0,@toDay),0)
@@ -13,12 +14,21 @@ DECLARE @Tienda INT = 1
 WITH articulosCTE (Articulo)
 AS
 (
-    SELECT Articulo FROM Articulos WHERE Subfamilia IN (
-		'01','25'
-    )
+	SELECT Articulo FROM Catalogo WHERE Tienda = @Tienda AND Baja = 0		
 )
 
 SELECT * FROM (
+SELECT 
+	Suc,Subfamilia,DescripcionSubfamilia,
+	Articulo,Nombre,ExistUV,Relacion,CostoNet,CostoExist,Precio,Util,
+	Estatus,Stock30,uvAñoAnterior,uvAñoActual,
+	Tendencia = CASE
+		WHEN uvAñoActual > uvAñoAnterior THEN 1 - (uvAñoAnterior/uvAñoActual)
+		WHEN uvAñoActual < uvAñoAnterior THEN (1 - (uvAñoActual/uvAñoAnterior)) * -1
+		ELSE 0.00
+	END,
+	mxnAñoAnterior,mxnAñoActual
+FROM (
 SELECT Suc = @Sucursal,
 	Subfamilia,DescripcionSubfamilia,
 	A.Articulo,Nombre,ExistUV = ExistenciaActualRegular,
@@ -49,4 +59,5 @@ LEFT JOIN (
 WHERE Almacen = @Almacen AND Tienda = @Tienda
 	AND A.Articulo IN  (SELECT Articulo FROM articulosCTE)
 ) AS Tabla
-ORDER BY Articulo
+) AS SuperTabla
+WHERE Tendencia < 0
